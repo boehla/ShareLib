@@ -144,6 +144,9 @@ namespace Lib
             return toInt(ob, 0);
         }
         static public int toInt(Object ob, int defValue) {
+            long val = toLong(ob, defValue);
+            if (val > int.MaxValue) return defValue;
+            if (val < int.MinValue) return defValue;
             return (int)toLong(ob, defValue);
         }
         static public long toLong(Object ob) {
@@ -151,7 +154,7 @@ namespace Lib
         }
         static public long toLong(Object ob, long defValue) {
             if (ob == null) return defValue;
-            string strval = ob.ToString();
+            string strval = toString(ob);
             long retvalue = defValue;
             if (long.TryParse(strval, System.Globalization.NumberStyles.Any, Const.INV_CULTURE, out retvalue)) return retvalue;
             double dbvl = 0;
