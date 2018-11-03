@@ -134,7 +134,7 @@ namespace Lib
         }
         static public double toDouble(Object ob, double defValue) {
             if (ob == null) return defValue;
-            string strval = ob.ToString();
+            string strval = toString(ob);
             double retvalue = defValue;
             if (double.TryParse(strval, System.Globalization.NumberStyles.Any, Const.INV_CULTURE, out retvalue)) return retvalue;
             return defValue;
@@ -175,7 +175,7 @@ namespace Lib
             return toDateTime(ob, DateTime.MinValue);
         }
         static public DateTime toDateTime(Object ob, DateTime defValue) {
-            return toDateTime(ob, DateTime.MinValue, Const.DATE_TIME_FORMAT);
+            return toDateTime(ob, defValue, Const.DATE_TIME_FORMAT);
         }
         static public DateTime toDateTime(Object ob, DateTime defValue, String format){
             if (ob == null) return defValue;
