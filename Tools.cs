@@ -720,8 +720,8 @@ namespace Lib
 
         public void put(T newele) {
             lock (this) {
-                writeind++;
                 if (writeind < buffer.Length) {
+                    writeind++;
                     buffer[writeind] = newele;
                 }
             }
