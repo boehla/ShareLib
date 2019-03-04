@@ -20,6 +20,9 @@ namespace UnitTestProject {
             testValues.Add("class", new StringBuilder().Append("asdfa"));
 
             foreach (KeyValuePair<string, object> item in testValues) {
+                Assert.IsNull(vb.getVal(item.Key));
+            }
+            foreach (KeyValuePair<string, object> item in testValues) {
                 vb.setVal(item.Key, item.Value, TimeSpan.FromSeconds(1));
             }
             Assert.AreEqual(testValues.Count, vb.TotalCount);
@@ -38,6 +41,7 @@ namespace UnitTestProject {
             }
             string seckey = "ThisIsANewKey_SoThisNeedsAlawysARefresh";
             Assert.IsTrue(vb.needsRefresh(seckey));
+            Assert.IsNull(vb.getVal(seckey));
 
             vb.setVal(seckey, "value", TimeSpan.FromSeconds(1));
             
@@ -48,7 +52,7 @@ namespace UnitTestProject {
 
             foreach (KeyValuePair<string, object> item in testValues) {
                 Assert.IsTrue(vb.needsRefresh(item.Key));
-                Assert.AreEqual(null, vb.getVal(item.Key));
+                Assert.IsNull(vb.getVal(item.Key));
             }
 
             sta = DateTime.UtcNow;

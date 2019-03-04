@@ -275,24 +275,25 @@ namespace Lib
         static private Dictionary<string, MyWatch> watches = new Dictionary<string, MyWatch>();
 
         static public void resetWatches() {
-            try { 
-                watches.Clear();
+            try {
+                lock (watches) {
+                    watches.Clear();
+                }
             } catch (Exception ex) {
                 Logging.logException("", ex);
             }
         }
-
-        //static public void setWatch(string key) {
-        //    if (!watches.ContainsKey(key)) watches.Add(key, new MyWatch());
-        //    setWatch(key, !watches[key].IsRunning);
-        //}
         static public void setWatch(string key, bool on) {
-            try { 
-                if (!watches.ContainsKey(key)) watches.Add(key, new MyWatch());
-                if (on) {
-                    watches[key].Start();
-                } else {
-                    watches[key].Stop();
+            try {
+                lock (watches) {
+                    int threadID = System.Threading.Thread.CurrentThread.ManagedThreadId;
+                    key += "|" + threadID;
+                    if (!watches.ContainsKey(key)) watches.Add(key, new MyWatch());
+                    if (on) {
+                        watches[key].Start();
+                    } else {
+                        watches[key].Stop();
+                    }
                 }
             } catch (Exception ex) {
                 Logging.logException("", ex);
@@ -310,21 +311,28 @@ namespace Lib
                 dt.Columns.Add("last");
                 dt.Columns.Add("count");
 
-                List<string> keys = watches.Keys.ToList();
-                keys.Sort();
-
-                foreach (string key in keys) {
-                    if (key == null) continue;
-                    MyWatch entry = watches[key];
-                    if (entry == null) continue;
+                Dictionary<string, MyWatch> ret = new Dictionary<string, MyWatch>();
+                lock (watches) {
+                    List<string> keys = watches.Keys.ToList();
+                    keys.Sort();
+                    
+                    foreach (string key in keys) {
+                        if (key == null) continue;
+                        MyWatch entry = watches[key];
+                        string mainkey = key.Split('|')[0];
+                        if (!ret.ContainsKey(mainkey)) ret.Add(mainkey, new MyWatch());
+                        ret[mainkey].merge(entry);
+                    }
+                }
+                foreach(KeyValuePair<string, MyWatch> ent in ret) {
                     DataRow dr = dt.NewRow();
-                    dr["key"] = key;
-                    dr["total"] = formatTimeSpan(entry.Total);
-                    dr["avarage"] = formatTimeSpan(entry.Avarage_ms);
-                    dr["count"] = string.Format("{0:n0}", entry.Count);
-                    dr["min"] = formatTimeSpan(entry.Min);
-                    dr["max"] = formatTimeSpan(entry.Max);
-                    dr["last"] = formatTimeSpan(entry.Last);
+                    dr["key"] = ent.Key;
+                    dr["total"] = formatTimeSpan(ent.Value.Total);
+                    dr["avarage"] = formatTimeSpan(ent.Value.Avarage_ms);
+                    dr["count"] = string.Format("{0:n0}", ent.Value.Count);
+                    dr["min"] = formatTimeSpan(ent.Value.Min);
+                    dr["max"] = formatTimeSpan(ent.Value.Max);
+                    dr["last"] = formatTimeSpan(ent.Value.Last);
                     dt.Rows.Add(dr);
                 }
             } catch (Exception ex) {
@@ -339,6 +347,11 @@ namespace Lib
             private TimeSpan last = TimeSpan.Zero;
             private TimeSpan min = TimeSpan.MaxValue;
             private TimeSpan max = TimeSpan.MinValue;
+            private TimeSpan _elapsed = new TimeSpan(0);
+            new public TimeSpan Elapsed {
+                set { this._elapsed = value; }
+                get { return this._elapsed; }
+            }
             public new void Start() {
                 if (!base.IsRunning) {
                     count++;
@@ -351,17 +364,18 @@ namespace Lib
                     last = base.Elapsed - lastS;
                     if (min > last) min = last;
                     if (max < last) max = last;
+                    this.Elapsed = base.Elapsed;
                 }
                 base.Stop();
             }
             public double Avarage_ms {
                 get {
                     if (count == 0) return 0;
-                    return base.Elapsed.TotalMilliseconds / count;
+                    return this.Elapsed.TotalMilliseconds / count;
                 }
             }
             public TimeSpan Total {
-                get { return base.Elapsed; }
+                get { return this.Elapsed; }
             }
             public long Count {
                 get { return count; }
@@ -381,6 +395,12 @@ namespace Lib
                     return max;
                 }
             }
+            public void merge(MyWatch ow) {
+                this.count += ow.count;
+                if (ow.min < this.min) this.min = ow.min;
+                if (ow.max > this.max) this.max = ow.max;
+                this.Elapsed = this.Elapsed.Add(ow.Elapsed);
+            }
         }
         static public string formatTimeSpan(double ms) {
             if(ms < 1) {
@@ -397,13 +417,6 @@ namespace Lib
             if (ts.Minutes > 0) ret += ts.Minutes + "m ";
             if (ts.Seconds > 0) ret += ts.Seconds + "s ";
             if (ts.Milliseconds > 0) ret += ts.Milliseconds + "ms ";
-            if (ret.Length <= 0) {
-                int us = (int)ts.Ticks / 100;
-                int ns = (int)((ts.Ticks * 100) % 1000);
-
-                if (us > 0) ret += us + "us ";
-                if (ns > 0) ret += ns + "ns ";
-            }
             return ret;
         }
     }

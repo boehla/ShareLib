@@ -60,8 +60,6 @@
     </Compile>
     <Compile Include="HttpRequeset.cs" />
     <Compile Include="Logging.cs" />
-    <Compile Include="PowerLib.cs" />
-    <Compile Include="ProgressTools.cs" />
     <Compile Include="TcpTools.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
