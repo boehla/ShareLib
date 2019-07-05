@@ -46,8 +46,13 @@ namespace Lib {
             this.setVal(key, val, DateTime.UtcNow.Add(expire));
         }
         public object getVal(string key) {
+            return getVal(key, false);
+        }
+        public object getVal(string key, bool evenIfExpired) {
             if (!vals.ContainsKey(key)) return null;
-            return vals[key].Value;
+            BuffEntry ret = vals[key];
+            if (!evenIfExpired && ret.Expired) return null;
+            return ret.Value;
         }
         public void cleanOlds() {
             List<string> toDel = new List<string>();
@@ -61,20 +66,12 @@ namespace Lib {
         }
         public class BuffEntry {
             object value = null;
-            DateTime lastSet = new DateTime(0);
             DateTime expire = new DateTime(0);
 
             public object Value {
-                set {
-                    this.value = value;
-                    lastSet = DateTime.UtcNow;
-                }
                 get {
                     return value;
                 }
-            }
-            public DateTime LastSet {
-                get { return this.lastSet; }
             }
             public DateTime ExpireDate {
                 get { return this.expire; }
@@ -85,7 +82,7 @@ namespace Lib {
                 }
             }
             public void setValue(object val, DateTime expireDate) {
-                this.Value = val;
+                this.value = val;
                 this.expire = expireDate;
             }
         }

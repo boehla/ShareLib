@@ -37,7 +37,8 @@ namespace UnitTestProject {
             // Values are still in there, but expired!
             foreach (KeyValuePair<string, object> item in testValues) {
                 Assert.IsTrue(vb.needsRefresh(item.Key));
-                Assert.AreEqual(item.Value, vb.getVal(item.Key));
+                Assert.AreEqual(item.Value, vb.getVal(item.Key, true));
+                Assert.AreEqual(null, vb.getVal(item.Key, false));
             }
             string seckey = "ThisIsANewKey_SoThisNeedsAlawysARefresh";
             Assert.IsTrue(vb.needsRefresh(seckey));

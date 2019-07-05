@@ -348,6 +348,7 @@ namespace Lib
             private TimeSpan min = TimeSpan.MaxValue;
             private TimeSpan max = TimeSpan.MinValue;
             private TimeSpan _elapsed = new TimeSpan(0);
+            private long lastStop = 0;
             new public TimeSpan Elapsed {
                 set { this._elapsed = value; }
                 get { return this._elapsed; }
@@ -365,6 +366,7 @@ namespace Lib
                     if (min > last) min = last;
                     if (max < last) max = last;
                     this.Elapsed = base.Elapsed;
+                    this.lastStop = DateTime.UtcNow.Ticks;
                 }
                 base.Stop();
             }
@@ -400,6 +402,7 @@ namespace Lib
                 if (ow.min < this.min) this.min = ow.min;
                 if (ow.max > this.max) this.max = ow.max;
                 this.Elapsed = this.Elapsed.Add(ow.Elapsed);
+                if(ow.lastStop > this.lastStop) this.last = ow.last;
             }
         }
         static public string formatTimeSpan(double ms) {
