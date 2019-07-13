@@ -8,6 +8,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -186,6 +188,9 @@ namespace Lib
             if (DateTime.TryParse(strval, Const.INV_CULTURE, DateTimeStyles.None, out retvalue)) return retvalue;
             return defValue;
         }
+        public static string Base64Encode(byte[] dat) {
+            return System.Convert.ToBase64String(dat);
+        }
         public static string Base64Encode(string plainText) {
             var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(plainText);
             return System.Convert.ToBase64String(plainTextBytes);
@@ -193,6 +198,9 @@ namespace Lib
         public static string Base64Decode(string base64EncodedData) {
             var base64EncodedBytes = System.Convert.FromBase64String(base64EncodedData);
             return System.Text.Encoding.UTF8.GetString(base64EncodedBytes);
+        }
+        public static byte[] Base64DecodeBinary(string base64EncodedData) {
+            return System.Convert.FromBase64String(base64EncodedData);
         }
 
         public static bool isEmpty(object ob) {
@@ -517,6 +525,31 @@ namespace Lib
             } else {
                 changed |= values[key].setValue(value);
             }
+        }
+        IFormatter serialiser = new BinaryFormatter();
+        public void serialize(object key, object value) {
+            if (!IsSerializable(value)) throw new Exception("Value is not serializable:" + value + "; key=" + key);
+            MemoryStream ms = new MemoryStream();
+            serialiser.Serialize(ms, value);
+            ms.Position = 0;
+            byte[] dat = new byte[ms.Length];
+            ms.Read(dat, 0, dat.Length);
+            this.set(key, Converter.Base64Encode(dat));
+        }
+        public object deserialize(object key) {
+            OptionParam op = this.get(Lib.Converter.toString(key));
+            if (op == null) return null;
+            MemoryStream ms = new MemoryStream();
+            byte[] dat = Converter.Base64DecodeBinary(op.Value);
+            ms.Write(dat, 0, dat.Length);
+            ms.Position = 0;
+            return serialiser.Deserialize(ms);
+        }
+        public static bool IsSerializable(object obj) {
+            Type t = obj.GetType();
+            if (t == null) return false;
+
+            return t.IsSerializable;
         }
         public OptionParam get(object key, object def) {
             return get(Lib.Converter.toString(key), def);

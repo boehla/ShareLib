@@ -39,13 +39,19 @@ namespace UnitTestProject {
         public void OptionFileTests() {
             Lib.Options obs = new Lib.Options(filename);
 
+            TestSerialize serl = new TestSerialize();
+            for(int i = 0; i < 100; i++) {
+                serl.Values.Add(i * i);
+            }
+            obs.serialize("serl", serl);
+
             List<TestValue> testvals = new List<TestValue>();
             int val = 1;
             testvals.Add(new TestValue(val++, true));
             testvals.Add(new TestValue(val++, false));
             testvals.Add(new TestValue(val++, 12.123123123m));
             testvals.Add(new TestValue(val++, -12.123123123m));
-            testvals.Add(new TestValue(val++, @"Hoi!""$""!)§ &(""$)""$)!"));
+            testvals.Add(new TestValue(val++, @"Hoi!""$""!)§ &(""$)""$)!,.-()//\\|{}[]<>:;"));
             testvals.Add(new TestValue(val++, "Hoi"));
             testvals.Add(new TestValue(val++, 12));
 
@@ -71,6 +77,13 @@ namespace UnitTestProject {
                     Assert.AreEqual(item.val, obsNew.get(item.name.ToString()).Value);
                 }
             }
+
+            
+            object de = obs.deserialize("serl");
+            Assert.IsNotNull(de);
+            Assert.IsTrue(de is TestSerialize);
+            TestSerialize deser = (TestSerialize)de;
+            Assert.AreEqual(serl, deser);
         }
 
         class TestValue {
@@ -79,6 +92,29 @@ namespace UnitTestProject {
             public TestValue(object name, object val) {
                 this.name = name;
                 this.val = val;
+            }
+        }
+        [Serializable]
+        class TestSerialize {
+            public List<int> Values = new List<int>();
+
+            public override bool Equals(object obj) {
+                if (obj == null) return false;
+                if (!(obj is TestSerialize)) return false;
+                TestSerialize ob = (TestSerialize)obj;
+
+                if (ob.Values.Count != this.Values.Count) return false;
+                for(int i = 0; i < ob.Values.Count; i++) {
+                    if (ob.Values[i] != this.Values[i]) return false;
+                }
+                return true;
+            }
+            public override int GetHashCode() {
+                int ret = 0;
+                for(int i = 0; i < this.Values.Count; i++){
+                    ret += (i + 100) * this.Values[i];
+                }
+                return ret;
             }
         }
     }
