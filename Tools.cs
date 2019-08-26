@@ -459,6 +459,9 @@ namespace Lib
                     } else if (item is RadioButton) {
                         RadioButton rb = (RadioButton)item;
                         rb.Checked = this.get(rb.Name, rb.Checked).BoolValue;
+                    } else if(item is TrackBar) {
+                        TrackBar rb = (TrackBar)item;
+                        rb.Value = this.get(rb.Name, rb.Value).IntValue;
                     }
                 }
             } finally {
@@ -480,6 +483,9 @@ namespace Lib
                 } else if (item is RadioButton) {
                     RadioButton rb = (RadioButton)item;
                     this.set(rb.Name, rb.Checked);
+                }else if(item is TrackBar) {
+                    TrackBar tb = (TrackBar)item;
+                    this.set(tb.Name, tb.Value);
                 }
             }
         }
