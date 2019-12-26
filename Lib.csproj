@@ -50,6 +50,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LRRD.cs" />
     <Compile Include="CoinParam.cs" />
     <Compile Include="Const.cs" />
     <Compile Include="DebugForm.cs">
@@ -60,6 +61,7 @@
     </Compile>
     <Compile Include="HttpRequeset.cs" />
     <Compile Include="Logging.cs" />
+    <Compile Include="RRDBuffer.cs" />
     <Compile Include="TcpTools.cs" />
     <Compile Include="Tools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -638,6 +638,13 @@ namespace Lib
         public int rpcPort = 18332;
         public string rpclogin = "foo";
         public string rpcpassword = "bar";
+        public JObject RequestJObject(string methodName, params JToken[] pars) {
+            List<JToken> gentx = new List<JToken>();
+            foreach (JToken ob in pars) {
+                gentx.Add(ob);
+            }
+            return JObject.Parse(RequestServer(methodName, gentx));
+        }
         public string RequestServer(string methodName, List<JToken> parameters) {
             string responseValue = string.Empty;
             try {
