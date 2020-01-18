@@ -43,6 +43,7 @@
             this.bPerfReset = new System.Windows.Forms.Button();
             this.bPerfRefresh = new System.Windows.Forms.Button();
             this.dgvPerfomance = new System.Windows.Forms.DataGridView();
+            this.cbAutoResizeColumns = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tpPerformance.SuspendLayout();
@@ -61,6 +62,7 @@
             this.lvLogFiles.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.colName});
             this.lvLogFiles.FullRowSelect = true;
+            this.lvLogFiles.HideSelection = false;
             this.lvLogFiles.Location = new System.Drawing.Point(0, 0);
             this.lvLogFiles.Name = "lvLogFiles";
             this.lvLogFiles.Size = new System.Drawing.Size(189, 414);
@@ -150,6 +152,7 @@
             // 
             // tpPerformance
             // 
+            this.tpPerformance.Controls.Add(this.cbAutoResizeColumns);
             this.tpPerformance.Controls.Add(this.cbAutorefresh);
             this.tpPerformance.Controls.Add(this.bPerfReset);
             this.tpPerformance.Controls.Add(this.bPerfRefresh);
@@ -203,6 +206,18 @@
             this.dgvPerfomance.Size = new System.Drawing.Size(822, 379);
             this.dgvPerfomance.TabIndex = 0;
             // 
+            // cbAutoResizeColumns
+            // 
+            this.cbAutoResizeColumns.AutoSize = true;
+            this.cbAutoResizeColumns.Checked = true;
+            this.cbAutoResizeColumns.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbAutoResizeColumns.Location = new System.Drawing.Point(254, 10);
+            this.cbAutoResizeColumns.Name = "cbAutoResizeColumns";
+            this.cbAutoResizeColumns.Size = new System.Drawing.Size(117, 17);
+            this.cbAutoResizeColumns.TabIndex = 3;
+            this.cbAutoResizeColumns.Text = "Autoresize columns";
+            this.cbAutoResizeColumns.UseVisualStyleBackColor = true;
+            // 
             // DebugForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -238,5 +253,6 @@
         private System.Windows.Forms.CheckBox cbAutorefresh;
         private System.Windows.Forms.Button bClearAll;
         private System.Windows.Forms.Button bClear;
+        private System.Windows.Forms.CheckBox cbAutoResizeColumns;
     }
 }

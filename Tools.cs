@@ -281,11 +281,13 @@ namespace Lib
     }
     public class Performance {
         static private Dictionary<string, MyWatch> watches = new Dictionary<string, MyWatch>();
+        static private DateTime Start = DateTime.UtcNow;
 
         static public void resetWatches() {
             try {
                 lock (watches) {
                     watches.Clear();
+                    Start = DateTime.UtcNow;
                 }
             } catch (Exception ex) {
                 Logging.logException("", ex);
@@ -312,6 +314,7 @@ namespace Lib
             DataTable dt = new DataTable();
             try { 
                 dt.Columns.Add("key");
+                dt.Columns.Add("per");
                 dt.Columns.Add("total");
                 dt.Columns.Add("avarage");
                 dt.Columns.Add("min");
@@ -332,9 +335,11 @@ namespace Lib
                         ret[mainkey].merge(entry);
                     }
                 }
+                TimeSpan tot = DateTime.UtcNow - Start;
                 foreach(KeyValuePair<string, MyWatch> ent in ret) {
                     DataRow dr = dt.NewRow();
                     dr["key"] = ent.Key;
+                    dr["per"] = string.Format("{0:0.0%}", ent.Value.Total.TotalSeconds / tot.TotalSeconds);
                     dr["total"] = formatTimeSpan(ent.Value.Total);
                     dr["avarage"] = formatTimeSpan(ent.Value.Avarage_ms);
                     dr["count"] = string.Format("{0:n0}", ent.Value.Count);

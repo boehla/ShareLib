@@ -25,6 +25,11 @@ namespace Lib {
         private static DebugForm form = null;
         private static int _maxFileSize_kb = 10000;
         private static bool first = true;
+        private static bool keepRunning = true;
+
+        public static void Close() {
+            keepRunning = false;
+        }
 
         public static void log(string text, LogOptions logO = LogOptions.None) {
             log(defaultfilename, text, logO);
@@ -53,7 +58,7 @@ namespace Lib {
             MyThreadPool.add("logger", logth);
         }
         private static void logThread() {
-            while (Thread.CurrentThread.ThreadState != ThreadState.StopRequested) {
+            while (keepRunning) {
                 try {
                     LogEntry clog = null;
                     do {

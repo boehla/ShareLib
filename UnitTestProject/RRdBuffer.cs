@@ -36,5 +36,20 @@ namespace UnitTestProject {
             Assert.IsFalse(rRD.Contains(testvalue));
             Assert.IsTrue(rRD.Contains(1));
         }
+
+        [TestMethod]
+        public void RRDBufferTestPerformance() {
+
+            RRDHashBuffer rRD = new RRDHashBuffer(100000);
+
+            int last = 0;
+            for (int i = 0; i < rRD.Length * 10; i++) {
+                rRD.addValue(i);
+                last = i;
+            }
+
+            Assert.IsFalse(rRD.Contains(1));
+            Assert.IsTrue(rRD.Contains(last));
+        }
     }
 }

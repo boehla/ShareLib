@@ -80,7 +80,7 @@ namespace Lib
                 }
                 if(showform) this.Show();
                 showform = false;
-                if(cbAutorefresh.Checked) dgvPerfomance.DataSource = Performance.getTable();
+                if (cbAutorefresh.Checked) refreshWatches();
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
             } finally {
@@ -115,8 +115,8 @@ namespace Lib
         }
 
         private void bPerfRefresh_Click(object sender, EventArgs e) {
-            try { 
-                dgvPerfomance.DataSource = Performance.getTable();
+            try {
+                refreshWatches();
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
             }
@@ -125,7 +125,7 @@ namespace Lib
         private void bPerfReset_Click(object sender, EventArgs e) {
             try { 
                 Performance.resetWatches();
-                dgvPerfomance.DataSource = Performance.getTable();
+                refreshWatches();
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
             }
@@ -138,6 +138,11 @@ namespace Lib
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message + "\r\n" + ex.StackTrace);
             }
+        }
+
+        private void refreshWatches() {
+            dgvPerfomance.DataSource = Performance.getTable();
+            if(cbAutoResizeColumns.Checked) dgvPerfomance.AutoResizeColumns();
         }
 
         private void bClearAll_Click(object sender, EventArgs e) {

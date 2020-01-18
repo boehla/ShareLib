@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace Lib {
     public class RRDHashBuffer {
+        public long Length {
+            get { return arrValues.Length; }
+        }
+
         HashSet<long> hashValues;
         long[] arrValues;
         int p;
@@ -14,20 +18,26 @@ namespace Lib {
             arrValues = new long[length];
             p = 0;
         }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="val"></param>
+        /// <returns>returns false if not added, because already contains value</returns>
+        public bool addValue(long val) {
+            if (val == 0) return false; // ignore 0, this is for hashes...
+            if (hashValues.Contains(val)) return false;
 
-        public void addValue(long val) {
-            if (val == 0) return; // ignore 0, this is for hashes...
-            if (hashValues.Contains(val)) return;
-
-            if (arrValues[p] > 0) hashValues.Remove(arrValues[p]);
+            if (arrValues[p] != 0) hashValues.Remove(arrValues[p]);
             hashValues.Add(val);
             arrValues[p] = val;
 
             p++;
             if (p >= arrValues.Length) p = 0;
+            return true;
         }
         public bool Contains(long val) {
             return hashValues.Contains(val);
         }
+
     }
 }
