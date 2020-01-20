@@ -320,7 +320,9 @@ namespace Lib
                 dt.Columns.Add("min");
                 dt.Columns.Add("max");
                 dt.Columns.Add("last");
+                dt.Columns.Add("merges");
                 dt.Columns.Add("count");
+                
 
                 Dictionary<string, MyWatch> ret = new Dictionary<string, MyWatch>();
                 lock (watches) {
@@ -346,6 +348,7 @@ namespace Lib
                     dr["min"] = formatTimeSpan(ent.Value.Min);
                     dr["max"] = formatTimeSpan(ent.Value.Max);
                     dr["last"] = formatTimeSpan(ent.Value.Last);
+                    dr["merges"] = string.Format("{0:n0}", ent.Value.CountMerges);
                     dt.Rows.Add(dr);
                 }
             } catch (Exception ex) {
@@ -410,12 +413,14 @@ namespace Lib
                     return max;
                 }
             }
+            public int CountMerges { get; set; } = 0;
             public void merge(MyWatch ow) {
                 this.count += ow.count;
                 if (ow.min < this.min) this.min = ow.min;
                 if (ow.max > this.max) this.max = ow.max;
                 this.Elapsed = this.Elapsed.Add(ow.Elapsed);
                 if(ow.lastStop > this.lastStop) this.last = ow.last;
+                this.CountMerges++;
             }
         }
         static public string formatTimeSpan(double ms) {
