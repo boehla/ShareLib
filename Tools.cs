@@ -11,6 +11,7 @@ using System.Net;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -107,6 +108,14 @@ namespace Lib
             }
             return string.Format("{0}{1}", space, suffix[logsize]);
         }
+        static public string getStringBetween(string dat, string start, string end) {
+            int startInd = dat.IndexOf(start);
+            if (startInd <= 0) return null;
+            startInd += start.Length;
+            int endInd = dat.IndexOf(end, startInd);
+            if (endInd <= 0) return null;
+            return dat.Substring(startInd, endInd - startInd);
+        }
         static public string toString(Object ob) {
             if (ob == null) return "";
             if (ob is DateTime) {
@@ -122,8 +131,8 @@ namespace Lib
             if (ob == null) return defValue;
             string strval = ob.ToString();
             bool retvalue = defValue;
-            string[] trueValues = new string[] { "1", "true"};
-            string[] falseeValues = new string[] { "0", "false" };
+            string[] trueValues = new string[] { "1", "true", "on", "enabled"};
+            string[] falseeValues = new string[] { "0", "false", "off", "disabled" };
             for (int i = 0; i < trueValues.Length; i++) {
                 if (strval.Equals(trueValues[i], StringComparison.InvariantCultureIgnoreCase)) return true;
                 if (strval.Equals(falseeValues[i], StringComparison.InvariantCultureIgnoreCase)) return false;
@@ -172,6 +181,9 @@ namespace Lib
             decimal retvalue = defValue;
             if (decimal.TryParse(strval, System.Globalization.NumberStyles.Any, Const.INV_CULTURE, out retvalue)) return retvalue;
             return defValue;
+        }
+        static public DateTime toDateTimeFromUnixMilli(long timestamp) {
+            return Const.ORIGN_DATE.AddMilliseconds(timestamp);
         }
         static public DateTime toDateTime(Object ob) {
             return toDateTime(ob, DateTime.MinValue);
