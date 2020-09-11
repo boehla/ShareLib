@@ -8,14 +8,9 @@ using System.Windows.Forms;
 using System.Windows.Shell;
 using System.Threading;
 using System.Net;
+using static Lib.Logging;
 
 namespace Lib {
-    [Flags]
-    public enum LogOptions {
-        None = 0,
-        WithoutDate = 1,
-        NotOnUI = 2,
-    }
     public class Logging {
         public static readonly string defaultfilename = "logfile.txt";
         public static readonly string  allkey = "log_all.txt";
@@ -23,23 +18,24 @@ namespace Lib {
 
         private static SharedData shared = new SharedData();
         private static DebugForm form = null;
-        private static int _maxFileSize_kb = 10000;
         private static bool first = true;
         private static bool keepRunning = true;
 
         public static void Close() {
             keepRunning = false;
         }
+        public static LogOptions DefaultOptions = new LogOptions();
 
-        public static void log(string text, LogOptions logO = LogOptions.None) {
+        public static void log(string text, LogOptions logO = null) {
             log(defaultfilename, text, logO);
         }
-        public static void log(string name, string text, LogOptions logO = LogOptions.None) {
+        public static void log(string name, string text, LogOptions logO = null) {
+            if (logO == null) logO = DefaultOptions;
             LogEntry loAll = new LogEntry(allkey, text, logO);
-            if (!logO.HasFlag(LogOptions.WithoutDate)) loAll.Text = loAll.Text.Insert(0, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff") + " " + name + " ");
+            if (logO.WithDate) loAll.Text = loAll.Text.Insert(0, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff") + " " + name + " ");
 
             LogEntry lo = new LogEntry(name, text, logO);
-            if (!logO.HasFlag(LogOptions.WithoutDate)) lo.Text = lo.Text.Insert(0, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff") + " ");
+            if (logO.WithDate) lo.Text = lo.Text.Insert(0, DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss.fff") + " ");
 
             lock (shared) {
                 shared.Logs.put(loAll);
@@ -81,9 +77,9 @@ namespace Lib {
                 DateTime dt = DateTime.Now;
 
                 if (!text.EndsWith("\r\n")) text += "\r\n";
-                if(!loge.Flags.HasFlag(LogOptions.NotOnUI)) form.log(loge);
+                if(loge.Options.OnUi) form.log(loge);
                 
-                writeToLogFile(text, filename);
+                writeToLogFile(text, filename, loge.Options);
             } catch { }
         }
         public static void logException(string text, Exception ex) {
@@ -117,7 +113,7 @@ namespace Lib {
             form.WindowState = FormWindowState.Normal;
         }
 
-        private static void writeToLogFile(string text, string filename) {
+        private static void writeToLogFile(string text, string filename, LogOptions opts) {
             try {
                 string logfile = _folder + filename;
                 string createfolder = new FileInfo(logfile).Directory.FullName;
@@ -127,7 +123,7 @@ namespace Lib {
 
                 if (File.Exists(logfile)) {
                     FileInfo finfo = new FileInfo(logfile);
-                    if (finfo.Length > _maxFileSize_kb * 1024) {
+                    if (finfo.Length > opts.LogFileSize) {
                         string oldLog = logfile + ".old";
                         if (File.Exists(oldLog)) File.Delete(oldLog);
                         File.Move(logfile, oldLog);
@@ -140,6 +136,12 @@ namespace Lib {
         }
         class SharedData {
             public LogEntries Logs = new LogEntries();
+        }
+
+        public class LogOptions {
+            public long LogFileSize { get; set; } = 10000 * 1024;
+            public bool WithDate { get; set; } = true;
+            public bool OnUi { get; set; } = true;
         }
     }
     public class LogEntries {
@@ -173,12 +175,12 @@ namespace Lib {
     public class LogEntry {
         public string Filename { get; set; }
         public StringBuilder Text { get; set; }
-        public LogOptions Flags { get; set; }
+        public LogOptions Options { get; set; }
 
         public LogEntry(string name, string text, LogOptions logO) {
             this.Filename = name;
             this.Text = new StringBuilder(text);
-            this.Flags = logO;
+            this.Options = logO;
         }
     }
 }
