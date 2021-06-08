@@ -41,6 +41,7 @@ namespace Lib
             return ret.Reverse().ToArray();
         }
         public static string ByteArrayToString(byte[] ba) {
+            if (ba == null) return "";
             return ByteArrayToString(ba, 0, ba.Length);
         }
         public static string ByteArrayToString(byte[] ba, int start, int length) {
@@ -660,6 +661,7 @@ namespace Lib
         public int rpcPort = 18332;
         public string rpclogin = "foo";
         public string rpcpassword = "bar";
+        public int timeout = 10000;
         public JObject RequestJObject(string methodName, params JToken[] pars) {
             List<JToken> gentx = new List<JToken>();
             foreach (JToken ob in pars) {
@@ -698,7 +700,7 @@ namespace Lib
                 string s = JsonConvert.SerializeObject(joe);
                 byte[] byteArray = Encoding.UTF8.GetBytes(s);
                 webRequest.ContentLength = byteArray.Length;
-                webRequest.Timeout = 10000;
+                webRequest.Timeout = timeout;
                 Stream dataStream = webRequest.GetRequestStream();
                 dataStream.Write(byteArray, 0, byteArray.Length);
                 dataStream.Close();
